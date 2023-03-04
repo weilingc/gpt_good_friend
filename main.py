@@ -11,18 +11,17 @@ handler = WebhookHandler(settings.LINE_BOT_SECRET)
 
 app = FastAPI()
 
-def generate_response(message):
-  completions = openai.Completion.create(
-    engine="text-davinci-002",
-    prompt=message,
-    max_tokens=1024,
-    n=1,
-    stop=None,
-    temperature=0.5,
-  )
-  message = completions.choices[0].text
-  return message
 
+def generate_response(message):
+    # Note: you need to be using OpenAI Python v0.27.0 for the code below to work
+    conversation = []
+    conversation.append({"role": "user", "content": message})
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=conversation
+        )
+    conversation.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
+    return response['choices'][0]['message']['content'].strip()
 
 @app.post("/")
 async def echoBot(request: Request):
